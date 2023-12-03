@@ -1,7 +1,11 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { FormButton, FormStyle } from './ContactFormStyled';
+import { addContact } from 'redux/contactSlice';
+import { nanoid } from 'nanoid';
 
-export const ContactForm = ({ onAddContact }) => {
+const ContactForm = () => {
+  const dispatch = useDispatch();
   const [contact, setContact] = useState({ name: '', number: '' });
 
   const handleChange = e => {
@@ -18,9 +22,10 @@ export const ContactForm = ({ onAddContact }) => {
       return;
     }
 
-    onAddContact(name, number);
+    dispatch(addContact({ id: `id-${nanoid()}`, name, number }));
     setContact({ name: '', number: '' });
   };
+
   return (
     <FormStyle onSubmit={handleSubmit}>
       <input
@@ -43,3 +48,5 @@ export const ContactForm = ({ onAddContact }) => {
     </FormStyle>
   );
 };
+
+export default ContactForm;

@@ -1,40 +1,29 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { nanoid } from 'nanoid';
-
-import { ContactForm } from './ContactForm/ContactForm';
-import { ContactList } from './ContactList/ContactList';
-import { Filter } from './Filter/Filter';
+import ContactForm from './ContactForm/ContactForm';
+import ContactList from './ContactList/ContactList';
+import Filter from './Filter/Filter';
 import { GlobalStyle } from './GlobalStyle';
+import { addContact, deleteContact } from 'redux/contactSlice';
+import { setFilter } from 'redux/filterSlice';
 
-const inialState = [
-  { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-  { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-  { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-  { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-];
 export const App = () => {
-  const [contacts, setContacts] = useState(
-    () => JSON.parse(localStorage.getItem('ContactsList')) || inialState
-  );
-  const [filter, setFilter] = useState('');
+  const dispatch = useDispatch();
+  const contacts = useSelector(state => state.contacts);
+  const filter = useSelector(state => state.filter);
 
   useEffect(() => {
     localStorage.setItem('ContactsList', JSON.stringify(contacts));
   }, [contacts]);
 
   const handleChangeFilter = e => {
-    setFilter(e.target.value);
+    dispatch(setFilter(e.target.value));
   };
 
   const getFilteredContacts = () => {
     return contacts.filter(contact =>
       contact.name.toLowerCase().includes(filter.toLowerCase())
-    );
-  };
-
-  const deleteContact = contactId => {
-    setContacts(prevContacts =>
-      prevContacts.filter(contact => contact.id !== contactId)
     );
   };
 
@@ -48,10 +37,11 @@ export const App = () => {
       return;
     }
 
-    setContacts(prevContacts => [
-      ...prevContacts,
-      { id: `id-${nanoid()}`, name, number },
-    ]);
+    dispatch(addContact({ id: `id-${nanoid()}`, name, number }));
+  };
+
+  const handleDeleteContact = contactId => {
+    dispatch(deleteContact(contactId));
   };
 
   return (
@@ -62,7 +52,7 @@ export const App = () => {
       <Filter value={filter} onChange={handleChangeFilter} />
       <ContactList
         contacts={getFilteredContacts()}
-        onDeleteContact={deleteContact}
+        onDeleteContact={handleDeleteContact}
       />
       <GlobalStyle />
     </div>
